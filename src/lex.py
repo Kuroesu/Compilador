@@ -1,5 +1,6 @@
 import re
 
+
 codigo = """int limite=30;
             bool valor = false;
             int var = 4 / 2;
@@ -19,13 +20,15 @@ codigo = """int limite=30;
             }
             """
             
+
+            
 tokenOrder = ["TIPO","IF","WHILE","RETURN","NUMERO","VALOR_BOOL","ABRE_PARENTESE","FECHA_PARENTESE","ABRE_CHAVE",
               "FECHA_CHAVE","PONTO_E_VIRGULA","VIRGULA","EXCLAMACAO","OP_BOOLEANO","OP_ARITMETICO","ID"]
 
 tokensDict = {"TIPO" : r'(\bint\b)|(\bbool\b)',
           "IF" : r'\bif\b',
           "WHILE" : r'\bwhile\b',
-          'NUMERO' : r'\d+',
+          'NUMERO' : r'\d+$',
           "VALOR_BOOL": r'(\btrue\b)|(\bfalse\b)',
           "ABRE_PARENTESE" : r'\($',
           "FECHA_PARENTESE": r'\)$',
@@ -34,16 +37,17 @@ tokensDict = {"TIPO" : r'(\bint\b)|(\bbool\b)',
           "PONTO_E_VIRGULA":r';$',
           "VIRGULA":r',$',
           "EXCLAMACAO":r'!$',
-          "OP_BOOLEANO":r'(==$)|(>=$)|(<=$)|(<$)|(>$)|(or$)|(and$)',
+          "OP_BOOLEANO":r'(==$)|(>=$)|(<=$)| (!=$) |(<$)|(>$)|(or$)|(and$)',
           "OP_ARITMETICO":r'(\+$)|(-$)|(\*$)|(/$)|(=$)|(%$)',
           "RETURN":r'\breturn\b',                
-          "ID": r'\D\w'}
+          "ID": r'\D\w+'}
 
 
 def analizarLex(fonte):
     tokenList = []
     #quebra a string separando os lexemas
     lexemas = separaLexemas(fonte) 
+    
     linha = 1 # marca linha atual
     index = 0
     while(index < len(lexemas)):
@@ -66,12 +70,17 @@ def analizarLex(fonte):
                         tokenList.append(["OP_BOOLEANO",'>='])
                         index+=1
                         errLex = False #nao chama o exeption
-                        break;
+                        break
                     elif(lexemas[index] == '<' and lexemas[index+1] == '='):        
                         tokenList.append(["OP_BOOLEANO",'<='])
                         index+=1
                         errLex = False #nao chama o exeption
-                        break;
+                        break
+                    elif(lexemas[index] == '!' and lexemas[index+1] == '='):
+                        tokenList.append(["OP_BOOLEANO",'!='])
+                        index+=1
+                        errLex = False
+                        break
                     else:
                         tk = re.match(expRegular,lexemas[index])#faz o match do lexema com a expressao regular
                         if(tk is not None):
@@ -80,13 +89,11 @@ def analizarLex(fonte):
                             break
                          
                 if(errLex):
-                    for i in tokenList:
-                        print i 
+#                     for i in tokenList:
+#                         print i
                     raise Exception("erro ao indentificar o caracter",lexemas[index],"na linha",linha)
         index+=1      
-              
-    for i in tokenList:
-        print i                
+                             
     return tokenList    
    
 def separaLexemas(fonte):
@@ -107,7 +114,9 @@ def separaLexemas(fonte):
 # else:    
 #     print "ERRO"
     
-analizarLex(codigo)   
+a = analizarLex(codigo)
+# for i in a:
+#     print i   
 
 
 
