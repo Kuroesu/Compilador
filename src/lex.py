@@ -3,7 +3,7 @@ import re
 
 codigo = """int limite=30;
             bool valor = false;
-            int var = 4 / 2;
+            int var = 4- 2;
             bool func(int num,bool valor){
                 if(num == 20){
                     return true;
@@ -22,11 +22,13 @@ codigo = """int limite=30;
             
 
             
-tokenOrder = ["TIPO","IF","WHILE","RETURN","NUMERO","VALOR_BOOL","ABRE_PARENTESE","FECHA_PARENTESE","ABRE_CHAVE",
-              "FECHA_CHAVE","PONTO_E_VIRGULA","VIRGULA","EXCLAMACAO","OP_BOOLEANO","OP_ARITMETICO","ID"]
+tokenOrder = ["TIPO","IF","ELSE","WHILE","RETURN","NUMERO","VALOR_BOOL","ABRE_PARENTESE","FECHA_PARENTESE","ABRE_CHAVE",
+              "FECHA_CHAVE","PONTO_E_VIRGULA","VIRGULA","BREAK","VOID","PRINT","CONTINUE","EXCLAMACAO","ATRIBUICAO","RETURN",
+              "OP_BOOLEANO","OP_ARITMETICO","ID"]
 
 tokensDict = {"TIPO" : r'(\bint\b)|(\bbool\b)',
           "IF" : r'\bif\b',
+          "ELSE" : r'\belse\b',
           "WHILE" : r'\bwhile\b',
           'NUMERO' : r'\d+$',
           "VALOR_BOOL": r'(\btrue\b)|(\bfalse\b)',
@@ -38,15 +40,20 @@ tokensDict = {"TIPO" : r'(\bint\b)|(\bbool\b)',
           "VIRGULA":r',$',
           "EXCLAMACAO":r'!$',
           "OP_BOOLEANO":r'(==$)|(>=$)|(<=$)| (!=$) |(<$)|(>$)|(or$)|(and$)',
-          "OP_ARITMETICO":r'(\+$)|(-$)|(\*$)|(/$)|(=$)|(%$)',
-          "RETURN":r'\breturn\b',                
-          "ID": r'\D\w+'}
+          "OP_ARITMETICO":r'(\+$)|(-$)|(\*$)|(/$)|(%$)',
+          "ATRIBUICAO":r'=',
+          "VOID":r'\bvoid\b',
+          "RETURN":r'\breturn\b',
+          "BREAK":r'\bbreak\b',
+          "CONTINUE":r'\bcontinue\b',
+          "PRINT":r'\bprint\b',                
+          "ID": r'\w'}
 
 
 def analizarLex(fonte):
     tokenList = []
-    #quebra a string separando os lexemas
-    lexemas = separaLexemas(fonte) 
+    
+    lexemas = separaLexemas(fonte)#quebra a string separando os lexemas 
     
     linha = 1 # marca linha atual
     index = 0
@@ -89,8 +96,8 @@ def analizarLex(fonte):
                             break
                          
                 if(errLex):
-#                     for i in tokenList:
-#                         print i
+                    for i in tokenList:
+                        print i
                     raise Exception("erro ao indentificar o caracter",lexemas[index],"na linha",linha)
         index+=1      
                              
@@ -99,7 +106,7 @@ def analizarLex(fonte):
 def separaLexemas(fonte):
     lexemas = []
     #quebra a string separando os lexemas
-    sliceFonte = re.split("([ *(^)*{^}*;*,*=*+*-*>*<*!*\\*\*])",fonte)
+    sliceFonte = re.split("([ *(^)*{^}*;*,*=*+*\-*>*<*!*/*\*])",fonte)
     for lex in sliceFonte:
         if(lex != '' and lex != ' ' and len(lex)>0):
             lexemas.append(lex)
@@ -115,6 +122,7 @@ def separaLexemas(fonte):
 #     print "ERRO"
     
 a = analizarLex(codigo)
+# print a
 # for i in a:
 #     print i   
 
