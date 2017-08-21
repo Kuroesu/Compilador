@@ -1,4 +1,5 @@
 import re
+from estruturas import *
 
 
 codigo = """int limite=30;
@@ -20,13 +21,13 @@ codigo = """int limite=30;
             }
             """
             
-
+detected_type = False 
             
 tokenOrder = ["TIPO","IF","ELSE","WHILE","RETURN","NUMERO","VALOR_BOOL","ABRE_PARENTESE","FECHA_PARENTESE","ABRE_CHAVE",
               "FECHA_CHAVE","PONTO_E_VIRGULA","VIRGULA","BREAK","VOID","PRINT","CONTINUE","EXCLAMACAO","ATRIBUICAO","RETURN",
               "OP_BOOLEANO","OP_ARITMETICO","ID"]
 
-tokensDict = {"TIPO" : r'(\bint\b)|(\bbool\b)',
+tokensDict = {"TIPO" : r'(\bint\b)|(\bbool\b)|(\bvoid\b)',
           "IF" : r'\bif\b',
           "ELSE" : r'\belse\b',
           "WHILE" : r'\bwhile\b',
@@ -67,7 +68,7 @@ def analizarLex(fonte):
                 for token in tokenOrder:#itera sobre as keys do dicionario 
               
                     expRegular = tokensDict[token]#seleciona a expressao regular
-
+                    
                     if((lexemas[index] == '=') and (lexemas[index+1] == '=')):
                         tokenList.append(["OP_BOOLEANO",'=='])
                         index+=1     
@@ -91,7 +92,18 @@ def analizarLex(fonte):
                     else:
                         tk = re.match(expRegular,lexemas[index])#faz o match do lexema com a expressao regular
                         if(tk is not None):
+                            
                             tokenList.append([token,lexemas[index]])#se reconhecer o lexema add na lista de tokens
+                            if(token == "TIPO"):
+                                global detected_type
+                                tipoBuffer = ""
+                                tipoBuffer = lexemas[index]
+                                detected_type = True
+                            if(token == "ID" and detected_type):
+                                global detected_type
+                                tabela_de_simbolos.append({"ID":lexemas[index],"TIPO":tipoBuffer})
+                                detected_type = False    
+ 
                             errLex = False #nao chama o exeption
                             break
                          
@@ -101,7 +113,7 @@ def analizarLex(fonte):
                     raise Exception("erro ao indentificar o caracter",lexemas[index],"na linha",linha)
         index+=1      
                              
-    return tokenList    
+    return tokenList,tabela_de_simbolos    
    
 def separaLexemas(fonte):
     lexemas = []
@@ -121,7 +133,8 @@ def separaLexemas(fonte):
 # else:    
 #     print "ERRO"
     
-a = analizarLex(codigo)
+# a,tab = analizarLex(codigo)
+
 # print a
 # for i in a:
 #     print i   
